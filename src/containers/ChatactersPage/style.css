@@ -1,0 +1,40 @@
+.button {
+    background-color: #6574cd;
+    color: white;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+    margin: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #5661b3;
+}
+
+.button:disabled {
+    background-color: #a0aec0;
+    color: #cbd5e0;
+    cursor: not-allowed;
+}
+
+.active {
+    border: 2px solid #ed8936;
+    color: #ed8936;
+}
+
+.pagination {
+    padding: 20px 0;
+}
+
+.pagination span {
+    user-select: none;
+}
+
+.pagination .button {
+    transition: all 0.3s;
+}
+
+.pagination .button:not(.active):hover {
+    transform: scale(1.1);
+}
