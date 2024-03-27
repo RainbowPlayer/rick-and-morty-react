@@ -6,9 +6,10 @@ type CharacterProps = {
     status: string;
     species: string;
     image: string;
+    onClick: (id: number) => void;
 };
 
-const Character = ({ id, name, status, species, image }: CharacterProps) => {
+const Character = ({ id, name, status, species, image, onClick }: CharacterProps) => {
     return (
         <div className="character-container">
             <img src={image} alt={`Персонаж ${name}`} className="character-image" />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { loadCharacters } from '../../redux/slices/characterSlice';
+import { loadCharacters, loadFilteredCharacters } from '../../redux/slices/characterSlice';
 import Character from '../../components/Character/Character';
 import { useAppDispatch } from '../../redux/hooks/useAppDispatch'
 import { RootState } from '../../redux/store';
@@ -8,6 +8,7 @@ import Button from '../../components/Button/Button';
 import './style.css';
 import { useNavigate } from 'react-router-dom';
 import { ROUTING } from '../../constants/ROUTING';
+import Input from '../../components/Input/Input';
 
 type Character = {
     id: number;
@@ -20,6 +21,7 @@ type Character = {
 const CharactersPage = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
     const dispatch = useAppDispatch();
     const { data, error } = useSelector((state: RootState) => state.characters);
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ const CharactersPage = () => {
     useEffect(() => {
         dispatch(loadCharacters(currentPage));
         if (data?.info?.pages) setTotalPages(data.info.pages);
-    }, [dispatch, currentPage, data?.info?.pages]);
+    }, [dispatch, currentPage]);
 
     const renderPagination = () => {
         const pagination = [];
@@ -58,21 +60,38 @@ const CharactersPage = () => {
         navigate(`${ROUTING.CHARACTERS}/${id}`);
     };
 
+    useEffect(() => {
+        if (searchTerm) {
+            dispatch(loadFilteredCharacters({ searchTerm, page: currentPage }));
+        } else {
+            dispatch(loadCharacters(currentPage));
+        }
+        if (data?.info?.pages) setTotalPages(data.info.pages);
+    }, [dispatch, currentPage, data?.info?.pages, searchTerm]);
+
     return (
-        <div>
-            <h1>Персонажі Ріка і Морті</h1>
-            <div>
+        <div className='main-container'>
+            <div className='header-container'>
+                <h1>Rick and Morty</h1>
+                <Input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Пошук персонажів..."
+                />
+            </div>
+            
+            <div className='characters-container'>
                 {data?.results.map((character: Character) => (
-                    <div onClick={() => handleCharacterClick(character.id)} key={character.id}>
-                        <Character
-                            key={character.id}
-                            id={character.id}
-                            name={character.name}
-                            status={character.status}
-                            species={character.species}
-                            image={character.image}
-                        />
-                    </div>     
+                    <Character
+                        key={character.id}
+                        id={character.id}
+                        name={character.name}
+                        status={character.status}
+                        species={character.species}
+                        image={character.image}
+                        onClick={() => handleCharacterClick(character.id)}
+                    />
                 ))}
             </div>
             <div className="pagination">

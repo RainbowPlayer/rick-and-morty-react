@@ -15,6 +15,11 @@ const initialState: CharacterState = {
     error: null,
 };
 
+interface LoadFilteredCharactersArgs {
+    searchTerm: string;
+    page: number;
+}
+
 export const loadCharacters = createAsyncThunk(
     'characters/load',
     async (page: number, { rejectWithValue }) => {
@@ -29,7 +34,23 @@ export const loadCharacters = createAsyncThunk(
             return rejectWithValue(err instanceof Error ? err.message : 'Unknown error');
         }
     }
+);
 
+export const loadFilteredCharacters = createAsyncThunk(
+    'characters/loadFiltered',
+    async ({searchTerm = '', page = 1}: LoadFilteredCharactersArgs, { rejectWithValue }) => {
+        try {
+            const url = `${RICK_AND_MORTY_API.characters}/?name=${encodeURIComponent(searchTerm)}&page=${page}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Failed to fetch filtered characters');
+            }
+            const data = await response.json();
+            return data;
+        } catch (err) {
+            return rejectWithValue(err instanceof Error ? err.message : 'Unknown error');
+        }
+    }
 );
 
 export const loadCharacterDetails = createAsyncThunk(
@@ -73,6 +94,17 @@ const characterSlice = createSlice({
                 state.details = action.payload;
             })
             .addCase(loadCharacterDetails.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload as string;
+            })
+            .addCase(loadFilteredCharacters.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(loadFilteredCharacters.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.data = action.payload;
+            })
+            .addCase(loadFilteredCharacters.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload as string;
             });
